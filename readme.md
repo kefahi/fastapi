@@ -42,20 +42,23 @@ python backend/main.py
 
 ```
 # Build
-podman build -t backend .
+podman build -t fastapi-backend .
 
 # Run 
-podman run --name backend --rm \
+podman run --name fastapi-backend --rm \
   -e LOG_PATH=/var/log/ \
   -e DATABASE_URL="postgresql://MYDBUSER:MYPASS@DBSERVERIP/DB" \
   -p 127.0.0.1:8080:8080/tcp \
-  -it backend \
+  -it fastapi-backend \
   /usr/bin/python3 /home/backend/main.py
+  
+# Command line access inside the container
+podman exec -it fastapi-backend ash
 
 # The image can be saved to a file for off-line deployement
-podman save --quiet -o backend.tar backend
-gzip backend.tar
+podman save --quiet -o fastapi-backend.tar backend
+gzip fastapi-backend.tar
 
 # Then loaded at the target system
-podman load -i backend.tar.gz
+podman load -i fastapi-backend.tar.gz
 ```
