@@ -16,7 +16,7 @@ A python Fastapi skeleton that is crafted to fit specific needs: Building a simp
 - Suggested code structure
   - Each Api set is served from a separate directory and can be mounted arbitrarily on the main api route
   - utils folder to contain common code like settings/db models ...etc.
-- Optimized / small footprint container image based on barebone Alpine 3.15. The skeleton image size containing the code + python + depdedent python modules is (fastapi-backend.tar.gz) is only 23MB. This also makes it an ideal option for off-line deployements (copying the image to a server that doesn't have internet access). 
+- Optimized / small footprint container image based on barebone Alpine 3.15. The skeleton image size containing the code + python + depdedent python modules (the file fastapi-backend.tar.gz below) is only 23MB. This also makes it an ideal option for off-line deployements (copying the image to a server that doesn't have internet access). 
 
 ### Install / usage
 
