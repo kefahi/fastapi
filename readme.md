@@ -5,17 +5,17 @@ A python Fastapi skeleton that is crafted to fit specific needs: Building a simp
 ### Features
 
 - Using `json_logging` and FastApi middleware to create jsonl (JSON Lines) log file 
-..- Easy to view and query using tools like `jq`
-..- Captures errors/exception with stacktrace
-..- Produces a log entry for every api call
+  - Easy to view and query using tools like `jq`
+  - Captures errors/exception with stacktrace
+  - Produces a log entry for every api call
 - Settings setup to feed from `dotenv` style (File or Environment variables) 
-..- Port/Listen address
-..- Database connection string
-..- Log file path (jsonl)
+  - Port/Listen address
+  - Database connection string
+  - Log file path (jsonl)
 - Database configuration using `SQLAlchemy`
 - Suggested code structure
-..- Each Api set is served from a separate directory and can be mounted arbitrarily on the main api route
-..- utils folder to contain common code like settings/db models ...etc.
+  - Each Api set is served from a separate directory and can be mounted arbitrarily on the main api route
+  - utils folder to contain common code like settings/db models ...etc.
 
 ### Install / usage
 
