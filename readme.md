@@ -7,23 +7,30 @@ A python Fastapi skeleton that is crafted to fit specific needs: Building a simp
 - Using `json_logging` and FastApi middleware to create jsonl (JSON Lines) log file 
   - Easy to view and query using tools like `jq`
   - Captures errors/exception with stacktrace
-  - Produces a log entry for every api call
+  - Produces a log entry for every api call with extensible details
 - Settings setup to feed from `dotenv` style (File or Environment variables) 
   - Port/Listen address
   - Database connection string
   - Log file path (jsonl)
 - Database configuration using `SQLAlchemy`
 - Suggested code structure
-  - Under `api` folder, apis are broken into api-sets, each Api set is served from a separate directory and can be mounted arbitrarily on the main api route. e.g. /my1stapiset, /2ndapiset ...etc.
-  - `utils` folder contains common code like settings, db models ...etc.
-- Optimized / small footprint container image based on barebone Alpine 3.15. The skeleton image size containing the code + python + depdedent python modules (the file fastapi-backend.tar.gz below) is only 23MB. This also makes it an ideal option for off-line deployements (copying the image to a server that doesn't have internet access). 
+  - `api` folder: apis are broken into api-sets, each Api set is served from a separate directory and can be mounted arbitrarily on the main api route. e.g. /my1stapiset, /2ndapiset ...etc.
+  - `utils` folder: contains common code like settings, db models ...etc.
+- Optimized / small footprint container image based on barebone Alpine 3.15. The skeleton image size containing the code + python + depdedent python modules (the file fastapi-backend.tar.gz below) is only 23MB. This also makes it ideal for off-line deployements (copying the image to a server that doesn't have internet access). 
 
 ### Install / usage
 
 #### Requirements
 
-- Python 3
-- Pip
+- git
+- python 3
+- pip
+
+Optional:
+
+- podman
+- gzip
+
 
 #### Clone the code
 
@@ -57,8 +64,7 @@ podman run --name fastapi-backend --rm \
 podman exec -it fastapi-backend ash
 
 # The image can be saved to a file for off-line deployement
-podman save --quiet -o fastapi-backend.tar backend
-gzip fastapi-backend.tar
+podman save --quiet backend | gzip > fastapi-backend.tar.gz
 
 # Then loaded at the target system
 podman load -i fastapi-backend.tar.gz
