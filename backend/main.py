@@ -7,11 +7,11 @@ import logging
 import logging.handlers
 import uvicorn
 # from settings import settings
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 import json_logging
 from utils.settings import settings
 from api.debug.router import router as debug
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 # from db import SessionLocal
 
@@ -31,7 +31,8 @@ logger.info("Starting")
 async def middle(request: Request, call_next):
     """ Wrapper function to manage errors and logging """
     start_time = time.time()
-    if "key" in request.query_params and "xyz" == request.query_params['key']:
+    # The api_key is enforced only if it set to none-empty value
+    if not settings.api_key or ("key" in request.query_params and settings.api_key == request.query_params['key']):
         try:
             response = await call_next(request)
         except:

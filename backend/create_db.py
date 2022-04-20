@@ -1,3 +1,5 @@
+""" Create database example """
+
 from utils.db import User, engine, Base, db
 
 Base.metadata.create_all(bind=engine)

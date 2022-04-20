@@ -1,3 +1,5 @@
+""" Try out """
+
 from utils.db import User, db
 
 users = db.query(User).all()
