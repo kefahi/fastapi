@@ -6,11 +6,17 @@ from pydantic import BaseSettings  # BaseModel,
 
 class Settings(BaseSettings):
     """ Main settings class """
-    database_url: str = ""
+    app_name: str = "myapp"
     log_path: str = "./logs/"
     listening_host: str = "0.0.0.0"
     listening_port: int = 8080
     api_key: str = ""
+
+    database_url: str = ""
+
+
+    freegeoip_api: str = ""
+    mocked_com_api: str = ""
 
     class Config:
         """ Load config """

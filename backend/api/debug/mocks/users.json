@@ -1,0 +1,20 @@
+[
+	{
+		"age": 12,
+		"id": 1,
+		"isPublic": true,
+		"status": "watching"
+	},
+	{
+		"age": 67,
+		"id": 2,
+		"isPublic": true,
+		"status": "watching"
+	},
+	{
+		"age": 51,
+		"id": 3,
+		"isPublic": false,
+		"status": "watching"
+	}
+]

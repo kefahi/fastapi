@@ -17,6 +17,8 @@ A python Fastapi skeleton that is crafted to fit specific needs: Building a simp
   - `api` folder: apis are broken into api-sets, each Api set is served from a separate directory and can be mounted arbitrarily on the main api route. e.g. /my1stapiset, /2ndapiset ...etc.
   - `utils` folder: contains common code like settings, db models ...etc.
 - Optimized / small footprint container image based on barebone Alpine 3.15. The skeleton image size containing the code + python + depdedent python modules (the file fastapi-backend.tar.gz below) is only 23MB. This also makes it ideal for air-gapped deployements (copying the image to a server that doesn't have internet access). 
+- Templated json/xml api requests using jinja2
+- Basic external api mocking using requests_mock
 
 ### Install / usage
 
@@ -47,31 +49,39 @@ pip install -r backend/requirements.txt
 # Create logs folder (path can be configured in sample.env)
 mkdir ../logs/
 
+cd backend 
+
+# Unit test
+python tests.py
+
 # To run:
-BACKEND_ENV=sample.env python backend/main.py
+BACKEND_ENV=sample.env python main.py
 # or 
 ./run.sh
+
+# Invoke sample apis using curl
+./curl.sh
 ```
 
 #### Using Podman/Container
 
 ```
 # Build
+podman rmi fastapi-backend
 podman build -t fastapi-backend .
 
 # Run 
 podman run --name fastapi-backend --rm \
-  -e LOG_PATH=/var/log/ \
   -e DATABASE_URL="postgresql://MYDBUSER:MYPASS@DBSERVERIP/DB" \
   -p 127.0.0.1:8080:8080/tcp \
   -it fastapi-backend \
-  /usr/bin/python3 /home/backend/main.py
+  /home/backend/run.sh
   
 # Command line access inside the container
 podman exec -it fastapi-backend ash
 
 # The image can be saved to a file for off-line deployement
-podman save --quiet backend | gzip > fastapi-backend.tar.gz
+podman save --quiet fastapi-backend | gzip > fastapi-backend.tar.gz
 
 # Then loaded at the target system
 podman load -i fastapi-backend.tar.gz
