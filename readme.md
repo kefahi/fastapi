@@ -54,6 +54,9 @@ cd backend
 # Unit test
 python tests.py
 
+# pytest
+pytest
+
 # To run:
 BACKEND_ENV=sample.env python main.py
 # or 

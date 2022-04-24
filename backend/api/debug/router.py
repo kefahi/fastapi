@@ -32,8 +32,8 @@ async def mytemp():
 @router.get('/sample')
 async def sample():
     """ Sample """
-    user = User()
-    print(user)
+    # user = User()
+    # print(user)
     return {'users': ['a', 'b', 'c']}
 
 
