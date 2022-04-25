@@ -24,7 +24,10 @@ log_handler = logging.handlers.RotatingFileHandler(filename=settings.log_path + 
 logger.addHandler(log_handler)
 json_logging.init_fastapi(enable_json=True)
 json_logging.init_request_instrument(app)
-logger.info("Starting")
+
+@app.on_event("startup")
+async def app_startup():
+    logger.info("Starting")
 
 
 @app.middleware("http")
