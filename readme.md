@@ -51,6 +51,9 @@ mkdir ../logs/
 
 cd backend 
 
+cp sample.env secrets.env
+source env.sh
+
 # Unit test
 python tests.py
 
@@ -58,7 +61,7 @@ python tests.py
 pytest
 
 # To run:
-BACKEND_ENV=sample.env python main.py
+python main.py
 # or 
 ./run.sh
 
