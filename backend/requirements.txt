@@ -8,3 +8,4 @@ pydantic
 uvicorn
 jinja2
 pydantic[dotenv]
+redis

@@ -1,8 +1,7 @@
 """ Debug api module """
 
-from utils.db import User
 from utils.template import json_render
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from .geoip import get_freegeoip
 from .ext_api import get_users, create_user, PostUser
 
@@ -13,7 +12,13 @@ async def get_geoip():
     """ Query external api example """
     return get_freegeoip() 
 
+@router.get('/mytest')
+async def get_mytest(one: str = Body(...), two: int = Body(...)):
+    return {"Hello": True, "values": { "1": one, "2": two}}
 
+@router.post('/mytest')
+async def post_mytest(one: str = Body(...), two: int = Body(...)):
+    return {"Hello": True, "values": { "1": one, "2": two}}
 
 @router.post('/users')
 async def serve_create_user(postuser: PostUser):
