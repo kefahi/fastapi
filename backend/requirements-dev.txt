@@ -1,2 +1,4 @@
-requests-mock
-pytest
+flake8-black
+coverage
+ipdb
+pytest-cov
