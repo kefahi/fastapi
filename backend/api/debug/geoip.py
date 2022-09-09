@@ -1,21 +1,20 @@
-import requests
+from utils.async_request import AsyncRequest
 from utils.logger import logger
 from utils.settings import settings
 
 
-def get_freegeoip() -> dict:
+async def get_freegeoip() -> dict:
     """Retrieve GeoIP details"""
-    response = requests.get(settings.freegeoip_api)
+
+    async with AsyncRequest() as client:
+        response = await client.get(settings.freegeoip_api)
 
     logger.info(
         "GeoIP request",
         extra={
             "props": {
                 "request": settings.freegeoip_api,
-                "response": {
-                    "code": response.status_code, 
-                    "content": response.json()
-                },
+                "response": {"code": response.status, "content": await response.json()},
             }
         },
     )

@@ -1,20 +1,25 @@
-import requests
+from utils.async_request import AsyncRequest
 from utils.logger import logger
 from utils.settings import settings
 from utils.template import plain_render
 from pydantic import BaseModel
 import json
 
+
 class PostUser(BaseModel):
     status: str
-    isPublic : bool
+    isPublic: bool
     age: int
 
-#  curl https://mockend.com/kefahi/fastapi/users?limit=3 
+
+#  curl https://mockend.com/kefahi/fastapi/users?limit=3
 #  curl -d '{"age": 10, "isPublic": false, "status": "working"}' -H "Content-Type: application/json" https://mockend.com/kefahi/fastapi/users
 
-def create_user(postuser: PostUser) -> dict:
-    headers = { "Content-Type": "application/json", }
+
+async def create_user(postuser: PostUser) -> dict:
+    headers = {
+        "Content-Type": "application/json",
+    }
 
     body = plain_render(
         __file__,
@@ -26,40 +31,40 @@ def create_user(postuser: PostUser) -> dict:
             "status": postuser.status,
         },
     )
+    async with AsyncRequest() as client:
+        response = await client.post(
+            settings.mocked_com_api, json=json.loads(body)
+        )  # , headers=headers)
 
-    response = requests.post(settings.mocked_com_api, json=json.loads(body)) # , headers=headers)
-
+    content = await response.text()
     logger.info(
         "Create user",
         extra={
             "props": {
                 "body": body,
-                "response": {
-                    "code": response.status_code, 
-                    "content": response.text
-                },
+                "response": {"code": response.status, "content": content},
             }
         },
     )
 
-    return { "content" : response.text, "response": { "code": 100}}
+    return {"content": content, "response": {"code": 100}}
 
 
-def get_users(limit: int) -> dict:
+async def get_users(limit: int) -> dict:
     """Get users from external api"""
-    response = requests.get(settings.mocked_com_api + f"?limit={limit}")
 
+    async with AsyncRequest() as client:
+        response = await client.get(settings.mocked_com_api + f"?limit={limit}")
+
+    content = await response.json()
     logger.info(
         "GeoIP request",
         extra={
             "props": {
                 "request": settings.freegeoip_api,
-                "response": {
-                    "code": response.status_code, 
-                    "content": response.json()
-                },
+                "response": {"code": response.status, "content": content},
             }
         },
     )
 
-    return { "content" : response.json(), "response": { "code": 150}}
+    return {"content": content, "response": {"code": 150}}

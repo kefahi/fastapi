@@ -1,10 +1,13 @@
-
 import logging
 import logging.handlers
-import json_logging
 from utils.settings import settings
+from concurrent_log_handler import ConcurrentRotatingFileHandler
+
 
 logger = logging.getLogger(settings.app_name)
 logger.setLevel(logging.INFO)
-log_handler = logging.handlers.RotatingFileHandler(filename=settings.log_path + '/x-ljson.log', maxBytes=5000000, backupCount=10)
+log_handler = ConcurrentRotatingFileHandler(
+    f"{settings.log_path}/x-ljson.log", "a", 5_000_000, 10
+)
+
 logger.addHandler(log_handler)
