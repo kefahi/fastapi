@@ -18,8 +18,7 @@ from hypercorn.asyncio import serve
 from hypercorn.config import Config
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from api.schemas import examples as api_examples
-from api.schemas.data import Error, Status
-from api.schemas.response import ApiException, ApiResponse
+from api.schemas.response import APIException, APIResponse, Error, Status
 from utils.response import OurResponse
 from utils.logger import logger
 from utils.settings import settings
@@ -90,9 +89,9 @@ async def my_exception_handler(_, exception):
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(_, exc: RequestValidationError):
     err = jsonable_encoder({"detail": exc.errors()})["detail"]
-    raise ApiException(
+    raise APIException(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        error=Error(code=422, type="validation", message=err),
+        error=Error(code=422, err_type="validation", message=err),
     )
 
 
@@ -113,11 +112,11 @@ async def middle(request: Request, call_next):
     ):
         try:
             response = await call_next(request)
-        except ApiException as ex:
+        except APIException as ex:
             response = JSONResponse(
                 status_code=ex.status_code,
                 content=jsonable_encoder(
-                    ApiResponse(status=Status.failed, error=ex.error)
+                    APIResponse(status=Status.failed, error=ex.error)
                 ),
             )
             stack = [
@@ -157,10 +156,10 @@ async def middle(request: Request, call_next):
         response = JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content=jsonable_encoder(
-                ApiResponse(
+                APIResponse(
                     status=Status.failed,
                     error=Error(
-                        type="bad request", code=112, message="Invalid request."
+                        err_type="bad request", code=112, message="Invalid request."
                     ),
                 )
             ),
@@ -249,10 +248,10 @@ async def myoptions():
 @app.patch("/{x:path}", include_in_schema=False, dependencies=[Depends(capture_body)])
 @app.delete("/{x:path}", include_in_schema=False, dependencies=[Depends(capture_body)])
 async def catchall():
-    raise ApiException(
+    raise APIException(
         status_code=status.HTTP_404_NOT_FOUND,
         error=Error(
-            type="catchall", code=501, message="Requested method or path is invalid"
+            err_type="catchall", code=501, message="Requested method or path is invalid"
         ),
     )
 
