@@ -10,23 +10,17 @@ class Status(str, Enum):
     failed = "failed"
 
 
-class Error(BaseModel):
-    err_type: str
-    code: int
-    message: str | list[dict]
-
-
 class APIResponse(BaseModel):
     status: Status
-    error: Error | None = None
+    error: api_errors.Error | None = None
     data: Dict[str, Any] | BaseModel | None = None
 
 
 class APIException(PyException):
     status_code: int
-    error: Error
+    error: api_errors.Error
 
-    def __init__(self, status_code: int, error: Error):
+    def __init__(self, status_code: int, error: api_errors.Error):
         super().__init__(status_code)
         self.status_code = status_code
         self.error = error
@@ -34,19 +28,19 @@ class APIException(PyException):
 
 class INVALID_ACCESS_TOKENResponse(APIResponse):
     status: Status = Status.failed
-    error: Error = api_errors.INVALID_ACCESS_TOKEN
+    error: api_errors.Error = api_errors.INVALID_ACCESS_TOKEN
 
 
 class ExpiredTokenResponse(APIResponse):
     status: Status = Status.failed
-    error: Error = api_errors.EXPIRED_TOKEN
+    error: api_errors.Error = api_errors.EXPIRED_TOKEN
 
 
 class ValidationErrorResponse(APIResponse):
     status: Status = Status.failed
-    error: Error = api_errors.VALIDATION_ERR
+    error: api_errors.Error = api_errors.VALIDATION_ERR
 
 
 class EligibilityErrorResponse(APIResponse):
     status: Status = Status.failed
-    error: Error = api_errors.ELIGIBILITY_ERR
+    error: api_errors.Error = api_errors.ELIGIBILITY_ERR

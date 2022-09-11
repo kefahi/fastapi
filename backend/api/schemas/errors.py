@@ -3,7 +3,13 @@
 
 # NOT_AUTHENTICATED = Error(err_type="auth", code=10, message="Not authenticated")
 
-from backend.api.schemas.response import Error
+from pydantic import BaseModel
+
+
+class Error(BaseModel):
+    err_type: str
+    code: int
+    message: str | list[dict]
 
 
 EXPIRED_TOKEN = Error(

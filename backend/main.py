@@ -18,7 +18,8 @@ from hypercorn.asyncio import serve
 from hypercorn.config import Config
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from api.schemas import examples as api_examples
-from api.schemas.response import APIException, APIResponse, Error, Status
+from api.schemas.response import APIException, APIResponse, Status
+from api.schemas.errors import Error
 from utils.response import OurResponse
 from utils.logger import logger
 from utils.settings import settings
