@@ -4,9 +4,11 @@ from typing import Any, Dict, Optional
 from fastapi import Request, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.settings import settings
-from api.schemas.response import ApiException
-import api.schemas.errors as api_errors
-import api.schemas.errors as err
+import models.api as api
+
+# from api.schemas.response import ApiException
+# import api.schemas.errors as api_errors
+# import api.schemas.errors as err
 
 
 class JWTBearer(HTTPBearer):
@@ -18,8 +20,8 @@ class JWTBearer(HTTPBearer):
         credentials: Optional[HTTPAuthorizationCredentials] = await super().__call__(
             request
         )
-        exception = ApiException(
-            status.HTTP_401_UNAUTHORIZED, api_errors.INVALID_ACCESS_TOKEN
+        exception = api.Exception(
+            status.HTTP_401_UNAUTHORIZED, api.INVALID_ACCESS_TOKEN
         )
 
         if credentials and credentials.scheme == "Bearer":
@@ -45,9 +47,9 @@ def decode_jwt(token: str) -> dict:
             token, settings.jwt_secret, algorithms=[settings.jwt_algorithm]
         )
     except:
-        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=err.INVALID_TOKEN)
+        raise api.Exception(status.HTTP_401_UNAUTHORIZED, error=api.INVALID_TOKEN)
     if "data" not in decoded_token or not decoded_token["data"]:
-        raise ApiException(status.HTTP_401_UNAUTHORIZED, error=err.INVALID_TOKEN)
+        raise api.Exception(status.HTTP_401_UNAUTHORIZED, error=api.INVALID_TOKEN)
     if decoded_token["expires"] < time():
-        raise ApiException(status.HTTP_410_GONE, api_errors.EXPIRED_TOKEN)
+        raise api.Exception(status.HTTP_410_GONE, api.EXPIRED_TOKEN)
     return decoded_token["data"]

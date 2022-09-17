@@ -8,13 +8,14 @@ pwd_context = CryptContext(
     sha256_crypt__default_rounds=91234,
     ldap_salted_md5__salt_size=16,
 )
-#! TBD to add the salt
+
+# TBD to add the salt
 SECRET_KEY = b"pseudorandomly generated server secret key"
 AUTH_SIZE = 32
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    #! TBD removing chk this in production
+    # TBD removing chk this in production
     if hashed_password.startswith("$"):
         return pwd_context.verify(plain_password, hashed_password)
     return compare_digest(hash_password(plain_password), hashed_password)

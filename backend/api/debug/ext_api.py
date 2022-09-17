@@ -17,9 +17,7 @@ class PostUser(BaseModel):
 
 
 async def create_user(postuser: PostUser) -> dict:
-    headers = {
-        "Content-Type": "application/json",
-    }
+    headers = { "Content-Type": "application/json", }
 
     body = plain_render(
         __file__,
@@ -33,7 +31,7 @@ async def create_user(postuser: PostUser) -> dict:
     )
     async with AsyncRequest() as client:
         response = await client.post(
-            settings.mocked_com_api, json=json.loads(body)
+            settings.mocked_com_api, json=json.loads(body), headers = headers
         )  # , headers=headers)
 
     content = await response.text()

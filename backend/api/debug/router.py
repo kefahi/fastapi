@@ -7,44 +7,50 @@ from .ext_api import get_users, create_user, PostUser
 
 router = APIRouter()
 
-@router.get('/geoip')
+
+@router.get("/geoip")
 async def get_geoip():
-    """ Query external api example """
-    return get_freegeoip() 
+    """Query external api example"""
+    return get_freegeoip()
 
-@router.get('/mytest')
+
+@router.get("/mytest")
 async def get_mytest(one: str = Body(...), two: int = Body(...)):
-    return {"Hello": True, "values": { "1": one, "2": two}}
+    return {"Hello": True, "values": {"1": one, "2": two}}
 
-@router.post('/mytest')
+
+@router.post("/mytest")
 async def post_mytest(one: str = Body(...), two: int = Body(...)):
-    return {"Hello": True, "values": { "1": one, "2": two}}
+    return {"Hello": True, "values": {"1": one, "2": two}}
 
-@router.post('/users')
+
+@router.post("/users")
 async def serve_create_user(postuser: PostUser):
-    return create_user(postuser);
+    return create_user(postuser)
 
-@router.get('/users')
+
+@router.get("/users")
 async def serve_get_users(limit: int):
     return get_users(limit)
 
-@router.get('/mytemp')
+
+@router.get("/mytemp")
 async def mytemp():
-    """ Jinja template example """
+    """Jinja template example"""
     return json_render(__file__, "mytemp.json.j2", {"name": "Alibaba", "age": 40})
 
 
-@router.get('/sample')
+@router.get("/sample")
 async def sample():
-    """ Sample """
+    """Sample"""
     # user = User()
     # print(user)
-    return {'users': ['a', 'b', 'c']}
+    return {"users": ["a", "b", "c"]}
 
 
 # Simulate exception to check proper handling
 # of exception and returning json response
-@router.get('/mybad')
+@router.get("/mybad")
 async def mybad():
     """Test path"""
     raise Exception("My bad!")

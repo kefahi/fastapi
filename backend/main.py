@@ -17,9 +17,7 @@ from fastapi.responses import JSONResponse
 from hypercorn.asyncio import serve
 from hypercorn.config import Config
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from api.schemas import examples as api_examples
-from api.schemas.data import Error, Status
-from api.schemas.response import ApiException, ApiResponse
+import models.api as api
 from utils.response import OurResponse
 from utils.logger import logger
 from utils.settings import settings
@@ -41,7 +39,38 @@ app = FastAPI(
     openapi_tags=[],
     version="0.0.1",
     redoc_url=None,
+    docs_url="/docs",
+    contact={
+        "name": "Kefah T. Issa",
+        "url": "https://dmart.cc",
+        "email": "kefah.issa@gmail.com",
+    },
+    license_info={
+        "name": "GNU Affero General Public License v3+",
+        "url": "https://www.gnu.org/licenses/agpl-3.0.en.html",
+    },
 )
+
+
+async def capture_body(request: Request):
+    request.state.request_body = {}
+    if ( request.method == "POST" and request.headers.get("content-type") == "application/json"):
+        request.state.request_body = await request.json()
+
+
+@app.exception_handler(StarletteHTTPException)
+async def my_exception_handler(_, exception):
+    return OurResponse(content=exception.detail, status_code=exception.status_code)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(_, exc: RequestValidationError):
+    err = jsonable_encoder({"detail": exc.errors()})["detail"]
+    raise api.Exception(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        error=api.Error(code=422, type="validation", message=err),
+    )
+
 
 json_logging.init_request_instrument(app)
 
@@ -56,44 +85,18 @@ async def app_startup():
     service_start_time = datetime.now().isoformat()
 
     openapi_schema = app.openapi()
-    """ Example for altering an endpoint
     paths = openapi_schema["paths"]
     for path in paths:
-        if path in ["/api/user/logout", "/api/user/delete"]:
-            for method in paths[path]:
-                responses = paths[path][method]["responses"]
-                if responses.get("422"):
-                    responses.pop("422")
-    """
+        for method in paths[path]:
+            responses = paths[path][method]["responses"]
+            if responses.get("422"):
+                responses.pop("422")
     app.openapi_schema = openapi_schema
 
 
 @app.on_event("shutdown")
 async def app_shutdown():
     logger.info("Application shutdown")
-
-
-async def capture_body(request: Request):
-    request.state.request_body = {}
-    if (
-        request.method == "POST"
-        and request.headers.get("content-type") == "application/json"
-    ):
-        request.state.request_body = await request.json()
-
-
-@app.exception_handler(StarletteHTTPException)
-async def my_exception_handler(_, exception):
-    return OurResponse(content=exception.detail, status_code=exception.status_code)
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(_, exc: RequestValidationError):
-    err = jsonable_encoder({"detail": exc.errors()})["detail"]
-    raise ApiException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        error=Error(code=422, type="validation", message=err),
-    )
 
 
 @app.middleware("http")
@@ -107,17 +110,14 @@ async def middle(request: Request, call_next):
     exception_data: dict[str, Any] | None = None
 
     # The api_key is enforced only if it set to none-empty value
-    if not settings.api_key or (
-        "key" in request.query_params
-        and settings.api_key == request.query_params["key"]
-    ):
+    if not settings.api_key or ( "key" in request.query_params and settings.api_key == request.query_params["key"]):
         try:
             response = await call_next(request)
-        except ApiException as ex:
+        except api.Exception as ex:
             response = JSONResponse(
                 status_code=ex.status_code,
                 content=jsonable_encoder(
-                    ApiResponse(status=Status.failed, error=ex.error)
+                    api.Response(status=api.Status.failed, error=ex.error)
                 ),
             )
             stack = [
@@ -157,9 +157,9 @@ async def middle(request: Request, call_next):
         response = JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content=jsonable_encoder(
-                ApiResponse(
-                    status=Status.failed,
-                    error=Error(
+                api.Response(
+                    status=api.Status.failed,
+                    error=api.Error(
                         type="bad request", code=112, message="Invalid request."
                     ),
                 )
@@ -174,21 +174,23 @@ async def middle(request: Request, call_next):
 
     extra = {
         "props": {
+            "timestamp": start_time,
             "duration": 1000 * (time.time() - start_time),
             "request": {
+                "url": request.url._url,
                 "verb": request.method,
                 "path": str(request.url.path),
-                "headers": dict(request.headers.items()),
                 "query_params": dict(request.query_params.items()),
+                "headers": dict(request.headers.items()),
                 "body": request.state.request_body
                 if hasattr(request.state, "request_body")
                 else {},
             },
             "response": {
                 "headers": dict(response.headers.items()),
+                "http_status": response.status_code,
                 "body": response_body,
             },
-            "http_status": response.status_code,
         }
     }
 
@@ -200,6 +202,7 @@ async def middle(request: Request, call_next):
         extra["props"]["response"]["body"] = response_body
 
     request.state.extra = extra
+
     return response
 
 
@@ -216,12 +219,12 @@ async def root():
         pass
 
     return {
-        "name": "GMW",
+        "name": "FastApiSkeleton",
         "type": "microservice",
-        "description": "Galleon Middleware for Self-service",
+        "description": "FastApi Skeleton",
         "status": "success",
         "start_time": service_start_time,
-        "current_time": datetime.now(),
+        "current_time": datetime.now().isoformat(),
         "version": version,
         "server": settings.servername,
     }
@@ -249,9 +252,9 @@ async def myoptions():
 @app.patch("/{x:path}", include_in_schema=False, dependencies=[Depends(capture_body)])
 @app.delete("/{x:path}", include_in_schema=False, dependencies=[Depends(capture_body)])
 async def catchall():
-    raise ApiException(
+    raise api.Exception(
         status_code=status.HTTP_404_NOT_FOUND,
-        error=Error(
+        error=api.Error(
             type="catchall", code=501, message="Requested method or path is invalid"
         ),
     )
